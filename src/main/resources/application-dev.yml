@@ -1,0 +1,31 @@
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://172.168.111.140:3306/test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&autoReconnect=true
+    username: root
+    password : Hbis@123
+
+iotdb:
+  sessionPool:
+    enable: true
+    ip: 172.168.111.140
+    port: 6667
+    user: "root"
+    password: "root"
+    maxSize: 8
+
+mybatis-plus:
+  mapper-locations: classpath*:com/hadwinling/**/mapping/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    lazy-loading-enabled: true
+    multiple-result-sets-enabled: true
+  global-config:
+    banner: false
+    enable-sql-runner: true
+    db-config:
+      id-type: assign_id
+      table-underline: true

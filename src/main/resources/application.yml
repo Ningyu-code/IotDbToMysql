@@ -1,0 +1,27 @@
+
+server:
+  # server服务器端口
+  port: 8089
+  snowflake:
+    worker-id: 1
+    datacenter-id: 1
+spring:
+  profiles:
+    active: dev
+  application:
+    name: Iotdb
+  messages:
+    encoding: UTF-8
+mybatis-plus:
+  mapper-locations: classpath*:com/hadwinling/**/mapping/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    lazy-loading-enabled: true
+    multiple-result-sets-enabled: true
+  global-config:
+    banner: false
+    enable-sql-runner: true
+    db-config:
+      id-type: assign_id
+      table-underline: true
