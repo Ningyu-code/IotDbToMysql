@@ -4,7 +4,9 @@
 
 package com.hadwinling.lotdb.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hadwinling.lotdb.entity.CustomTable;
 import com.hadwinling.lotdb.entity.DeviceData;
 import com.hadwinling.lotdb.mapper.DeviceDataMapper;
 import com.hadwinling.lotdb.service.IDeviceDataService;
@@ -13,14 +15,11 @@ import org.apache.iotdb.rpc.StatementExecutionException;
 import org.apache.iotdb.session.SessionDataSet;
 import org.apache.iotdb.session.pool.SessionDataSetWrapper;
 import org.apache.iotdb.session.pool.SessionPool;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author : ningyu
@@ -32,23 +31,56 @@ public class DeviceDataServiceImpl extends ServiceImpl<DeviceDataMapper, DeviceD
 
 
     @Override
-    public List<DeviceData> IotDbToMySql(SessionPool sessionPool, String deviceName, String DevicePath) throws IoTDBConnectionException, StatementExecutionException {
+    public List<JSONObject> IotDbToMySql(SessionPool sessionPool, String deviceName, String DevicePath) throws IoTDBConnectionException, StatementExecutionException {
         String sql="select "+deviceName+" from "+DevicePath;
         SessionDataSetWrapper dataSet = sessionPool.executeQueryStatement(sql);
         dataSet.setBatchSize(1024);
         SessionDataSet.DataIterator dataIterator = dataSet.iterator();
-        List<DeviceData> deviceData=new ArrayList<>();
+        List<String> columnNames = dataSet.getColumnNames();
+//        List<TSDataType> columnTypes = dataSet.getColumnTypes();
+        System.out.println(columnNames);
+//        System.out.println(columnTypes);
+//        JSONObject lastResult = new JSONObject();
+//        Map<String,Object> result = new HashMap<String,Object>();
+        List<JSONObject> result = new ArrayList<>();
+        JSONObject jasoncolumn = JSONObject.parseObject(JSONObject.toJSONString(columnNames));
         while (dataIterator.next()) {
-            DeviceData deviceData1 = new DeviceData();
+            JSONObject data = new JSONObject();
             Timestamp time=dataIterator.getTimestamp("Time");
             String value=dataIterator.getString(deviceName);
             String timeseries = dataIterator.getString("Device");
-            deviceData1.setDevice(timeseries);
-            deviceData1.setTime(time);
-            deviceData1.setValue(value);
-            deviceData.add(deviceData1);
+            data.put("time",time);
+            data.put("value",value);
+            data.put("timeseries",timeseries+"."+deviceName);
+            result.add(data);
         }
         dataSet.close();
-        return deviceData;
+        return result;
+    }
+
+    @Override
+    public List<CustomTable> getCustomTables(SessionPool sessionPool, String deviceName, String DevicePath) throws IoTDBConnectionException, StatementExecutionException {
+        String sql="select "+deviceName+" from "+DevicePath;
+        SessionDataSetWrapper dataSet = sessionPool.executeQueryStatement(sql);
+        dataSet.setBatchSize(1024);
+        SessionDataSet.DataIterator dataIterator = dataSet.iterator();
+        List<String> columnNames = dataSet.getColumnNames();
+        List<CustomTable> customTables = new ArrayList<>();
+        for(String columnName:columnNames){
+            CustomTable customTable = new CustomTable();
+            if (columnName.equals("Time"))
+            {
+                customTable.setCreateTableFiledName("time");
+                customTable.setFieldType("timestamp");
+            }else if (columnName.equals("Device")){
+                customTable.setCreateTableFiledName("timeseries");
+                customTable.setFieldType("varchar(100)");
+            }else if (columnName.equals(deviceName)){
+                customTable.setCreateTableFiledName(deviceName);
+                customTable.setFieldType("varchar(100)");
+            }
+            customTables.add(customTable);
+        }
+        return customTables;
     }
 }

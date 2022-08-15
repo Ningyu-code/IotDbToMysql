@@ -1,7 +1,7 @@
 
 server:
   # server服务器端口
-  port: 8089
+  port: 8081
   snowflake:
     worker-id: 1
     datacenter-id: 1

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hadwinling.lotdb.mapper.CreateTableMapper">
+    <update id="createCustomTable" parameterType="com.hadwinling.lotdb.entity.CreateTableAndTabbleName">
+            CREATE TABLE IF NOT EXISTS  ${tableName} (
+            `id` int NOT NULL AUTO_INCREMENT COMMENT '编号',
+            <foreach collection="customTables" item="item" separator="">
+                <if test="item.choose == true">
+                    ${item.createTableFiledName} ${item.fieldType}
+                    <choose>
+                        <when test="item.isNotNull != null and item.isNotNull !=''">
+                            NOT NULL
+                        </when>
+                    </choose>
+                    DEFAULT
+                    <choose>
+                        <when test="item.defaultValue != null and item.defaultValue !=''">
+                            ${item.defaultValue}
+                        </when>
+                        <otherwise>
+                            NULL
+                        </otherwise>
+                    </choose>
+                    COMMENT
+                    <choose>
+                        <when test="item.comment != null and item.comment !=''">
+                            '${item.comment}'
+                        </when>
+                        <otherwise>
+                            '${item.createTableFiledName}'
+                        </otherwise>
+                    </choose>
+                    ,
+                </if>
+            </foreach>
+            PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+        </update>
+</mapper>

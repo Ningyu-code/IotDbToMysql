@@ -3,7 +3,9 @@
  */
 package com.hadwinling.lotdb.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hadwinling.lotdb.entity.CustomTable;
 import com.hadwinling.lotdb.entity.DeviceData;
 import org.apache.iotdb.rpc.IoTDBConnectionException;
 import org.apache.iotdb.rpc.StatementExecutionException;
@@ -21,6 +23,7 @@ import java.util.List;
  */
 public interface IDeviceDataService extends IService<DeviceData> {
 
-    List<DeviceData> IotDbToMySql(SessionPool sessionPool, String deviceName, String DevicePath) throws IoTDBConnectionException, StatementExecutionException;
+    List<JSONObject> IotDbToMySql(SessionPool sessionPool, String deviceName, String DevicePath) throws IoTDBConnectionException, StatementExecutionException;
 
+    List<CustomTable> getCustomTables(SessionPool sessionPool, String deviceName, String DevicePath) throws IoTDBConnectionException, StatementExecutionException;
     }
