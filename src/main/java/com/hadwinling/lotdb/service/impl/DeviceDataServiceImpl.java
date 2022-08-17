@@ -77,6 +77,7 @@ public class DeviceDataServiceImpl extends ServiceImpl<DeviceDataMapper, DeviceD
         CreateTableAndTabbleName createTableAndTabbleName = new CreateTableAndTabbleName();
         String tableNameHavingDot = devicePath+"."+deviceName;
         String tableName = tableNameHavingDot.replace(".","_");
+        createTableAndTabbleName.setTableName(tableName);
         List<String> columnNames = dataSet.getColumnNames();
         dataSet.close();
         List<CustomTable> customTables = new ArrayList<>();
@@ -96,7 +97,6 @@ public class DeviceDataServiceImpl extends ServiceImpl<DeviceDataMapper, DeviceD
             customTable.setChoose(true);
             customTables.add(customTable);
         }
-        createTableAndTabbleName.setTableName(tableName);
         createTableAndTabbleName.setCustomTables(customTables);
         return createTableAndTabbleName;
     }

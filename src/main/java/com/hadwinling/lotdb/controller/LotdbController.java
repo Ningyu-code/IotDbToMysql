@@ -31,12 +31,6 @@ import java.util.List;
 @Controller
 public class LotdbController {
 
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-//    SessionPool sessionPool = new SessionPool("172.168.111.140",6667,"root","root",1000);
-
     @Autowired
     IDeviceDataService deviceDataService;
 
