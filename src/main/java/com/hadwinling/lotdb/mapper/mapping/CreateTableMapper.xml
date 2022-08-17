@@ -3,8 +3,7 @@
 <mapper namespace="com.hadwinling.lotdb.mapper.CreateTableMapper">
     <update id="createCustomTable" parameterType="com.hadwinling.lotdb.entity.CreateTableAndTabbleName">
             CREATE TABLE IF NOT EXISTS  ${tableName} (
-            `id` int NOT NULL AUTO_INCREMENT COMMENT '编号',
-            <foreach collection="customTables" item="item" separator="">
+            <foreach collection="customTables" item="item" separator="" index="index">
                 <if test="item.choose == true">
                     ${item.createTableFiledName} ${item.fieldType}
                     <choose>
@@ -30,10 +29,26 @@
                             '${item.createTableFiledName}'
                         </otherwise>
                     </choose>
-                    ,
+                    <if test="index != (customTables.size() - 1)">
+                        ,
+                    </if>
                 </if>
             </foreach>
-            PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
         </update>
+
+    <insert id="insertData">
+        insert into ${tableName}  values
+        <foreach collection="deviceData" item="item" index="index">
+                    ('${item.time}','${item.device}','${item.value}')
+            <choose>
+                <when test="index != (deviceData.size() - 1)">
+                    ,
+                </when>
+                <otherwise>
+                    ;
+                </otherwise>
+            </choose>
+        </foreach>
+    </insert>
 </mapper>

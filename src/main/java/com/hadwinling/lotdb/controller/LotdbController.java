@@ -30,8 +30,7 @@ import java.util.List;
  */
 @Controller
 public class LotdbController {
-    @Autowired
-    private SessionPool iotdbSessionPool;
+
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -47,17 +46,30 @@ public class LotdbController {
     @GetMapping("/result")
     @ResponseBody
     public List<JSONObject> IotDbToMysql() throws IoTDBConnectionException, StatementExecutionException {
-        List<JSONObject> deviceData = deviceDataService.IotDbToMySql(iotdbSessionPool, "9", "root.test.device.all align by device");
-        //定义表名
-        String tablename =deviceData.get(1).getString("timeseries");
-        CreateTableAndTabbleName tableInfo = new CreateTableAndTabbleName();
-        tableInfo.setTableName(tablename);
-        //定义字段数据类型
-        List<CustomTable> customTables = deviceDataService.getCustomTables(iotdbSessionPool, "9", "root.test.device.all align by device");
-        tableInfo.setCustomTables(customTables);
-        iCreateTableService.createCustomTable(tableInfo);
+        List<JSONObject> deviceData = deviceDataService.IotDbToJsonResult("tem", "root.haha","align by device");
+        //根据查到的IOTDB数据定制生成Mysql数据表信息
+        CreateTableAndTabbleName customTable = deviceDataService.getCustomTable("tem", "root.haha","align by device");
+        //生成表操作
+        iCreateTableService.createCustomTable(customTable);
+        //向生成表格插入数据
+        iCreateTableService.insertData(customTable.getTableName(),deviceData);
+
         return deviceData;
         }
+
+    @GetMapping("/param")
+    @ResponseBody
+    public List<JSONObject> IotDbToMysql(@RequestBody JSONObject jsonObject) throws IoTDBConnectionException, StatementExecutionException {
+        List<JSONObject> deviceData = deviceDataService.IotDbToJsonResult( jsonObject.getString("deviceName"), jsonObject.getString("devicePath"),jsonObject.getString("whereClause"));
+        //根据查到的IOTDB数据定制生成Mysql数据表信息
+        CreateTableAndTabbleName customTable = deviceDataService.getCustomTable( jsonObject.getString("deviceName"), jsonObject.getString("devicePath"),jsonObject.getString("whereClause"));
+        //生成表操作
+        iCreateTableService.createCustomTable(customTable);
+        //向生成表格插入数据
+        iCreateTableService.insertData(customTable.getTableName(),deviceData);
+
+        return deviceData;
+    }
 
 }
 

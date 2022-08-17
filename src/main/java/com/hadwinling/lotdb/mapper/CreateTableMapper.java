@@ -3,8 +3,12 @@
  */
 package com.hadwinling.lotdb.mapper;
 
+import com.alibaba.fastjson.JSONObject;
 import com.hadwinling.lotdb.entity.CreateTableAndTabbleName;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @author : ningyu
@@ -15,4 +19,7 @@ import org.apache.ibatis.annotations.Mapper;
 public interface CreateTableMapper {
 
     void createCustomTable(CreateTableAndTabbleName createTableAndTabbleName);
+
+    void insertData(@Param("tableName") String tableName,
+                    @Param("deviceData") List<JSONObject> jsonObjectList);
 }

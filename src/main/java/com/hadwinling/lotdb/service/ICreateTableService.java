@@ -3,7 +3,10 @@
  */
 package com.hadwinling.lotdb.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.hadwinling.lotdb.entity.CreateTableAndTabbleName;
+
+import java.util.List;
 
 /**
  * @author : ningyu
@@ -13,4 +16,6 @@ import com.hadwinling.lotdb.entity.CreateTableAndTabbleName;
 public interface ICreateTableService {
 
     void createCustomTable(CreateTableAndTabbleName createTableAndTabbleName);
+
+    void insertData(String tableName,List<JSONObject> jsonObjectList);
 }

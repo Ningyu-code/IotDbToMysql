@@ -6,6 +6,7 @@ package com.hadwinling.lotdb.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hadwinling.lotdb.entity.CreateTableAndTabbleName;
 import com.hadwinling.lotdb.entity.CustomTable;
 import com.hadwinling.lotdb.entity.DeviceData;
 import com.hadwinling.lotdb.mapper.DeviceDataMapper;
@@ -15,7 +16,7 @@ import org.apache.iotdb.rpc.StatementExecutionException;
 import org.apache.iotdb.session.SessionDataSet;
 import org.apache.iotdb.session.pool.SessionDataSetWrapper;
 import org.apache.iotdb.session.pool.SessionPool;
-import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -29,29 +30,39 @@ import java.util.*;
 @Service
 public class DeviceDataServiceImpl extends ServiceImpl<DeviceDataMapper, DeviceData> implements IDeviceDataService {
 
+    @Autowired
+    private SessionPool iotdbSessionPool;
+
+//    @Override
+//    public SessionDataSetWrapper getIotDbDataSet(String deviceName, String devicePath,String whereClause) throws IoTDBConnectionException, StatementExecutionException {
+//        String sql="select "+deviceName+" from "+devicePath+" "+whereClause;
+//        try {
+//            SessionDataSetWrapper dataSet = iotdbSessionPool.executeQueryStatement(sql);
+//            dataSet.setBatchSize(1024);
+//        }catch (IoTDBConnectionException | StatementExecutionException e) {
+//            e.printStackTrace();
+//        } finally {
+//            // remember to close data set finally!
+//            sessionPool.closeResultSet(wrapper);
+//        }
+//        return dataSet;
+//    }
 
     @Override
-    public List<JSONObject> IotDbToMySql(SessionPool sessionPool, String deviceName, String DevicePath) throws IoTDBConnectionException, StatementExecutionException {
-        String sql="select "+deviceName+" from "+DevicePath;
-        SessionDataSetWrapper dataSet = sessionPool.executeQueryStatement(sql);
+    public List<JSONObject> IotDbToJsonResult(String deviceName, String devicePath,String whereClause) throws IoTDBConnectionException, StatementExecutionException {
+        String sql="select "+deviceName+" from "+devicePath+" "+whereClause;
+        SessionDataSetWrapper dataSet = iotdbSessionPool.executeQueryStatement(sql);
         dataSet.setBatchSize(1024);
         SessionDataSet.DataIterator dataIterator = dataSet.iterator();
-        List<String> columnNames = dataSet.getColumnNames();
-//        List<TSDataType> columnTypes = dataSet.getColumnTypes();
-        System.out.println(columnNames);
-//        System.out.println(columnTypes);
-//        JSONObject lastResult = new JSONObject();
-//        Map<String,Object> result = new HashMap<String,Object>();
         List<JSONObject> result = new ArrayList<>();
-        JSONObject jasoncolumn = JSONObject.parseObject(JSONObject.toJSONString(columnNames));
         while (dataIterator.next()) {
             JSONObject data = new JSONObject();
             Timestamp time=dataIterator.getTimestamp("Time");
             String value=dataIterator.getString(deviceName);
-            String timeseries = dataIterator.getString("Device");
+            String device = dataIterator.getString("Device");
             data.put("time",time);
-            data.put("value",value);
-            data.put("timeseries",timeseries+"."+deviceName);
+            data.put(deviceName,value);
+            data.put("device",device);
             result.add(data);
         }
         dataSet.close();
@@ -59,19 +70,22 @@ public class DeviceDataServiceImpl extends ServiceImpl<DeviceDataMapper, DeviceD
     }
 
     @Override
-    public List<CustomTable> getCustomTables(SessionPool sessionPool, String deviceName, String DevicePath) throws IoTDBConnectionException, StatementExecutionException {
-        String sql="select "+deviceName+" from "+DevicePath;
-        SessionDataSetWrapper dataSet = sessionPool.executeQueryStatement(sql);
+    public CreateTableAndTabbleName getCustomTable( String deviceName, String devicePath,String whereClause) throws IoTDBConnectionException, StatementExecutionException {
+        String sql="select "+deviceName+" from "+ devicePath+" "+whereClause;
+        SessionDataSetWrapper dataSet = iotdbSessionPool.executeQueryStatement(sql);
         dataSet.setBatchSize(1024);
-        SessionDataSet.DataIterator dataIterator = dataSet.iterator();
+        CreateTableAndTabbleName createTableAndTabbleName = new CreateTableAndTabbleName();
+        String tableNameHavingDot = devicePath+"."+deviceName;
+        String tableName = tableNameHavingDot.replace(".","_");
         List<String> columnNames = dataSet.getColumnNames();
+        dataSet.close();
         List<CustomTable> customTables = new ArrayList<>();
         for(String columnName:columnNames){
             CustomTable customTable = new CustomTable();
             if (columnName.equals("Time"))
             {
                 customTable.setCreateTableFiledName("time");
-                customTable.setFieldType("timestamp");
+                customTable.setFieldType("varchar(100)");
             }else if (columnName.equals("Device")){
                 customTable.setCreateTableFiledName("timeseries");
                 customTable.setFieldType("varchar(100)");
@@ -79,8 +93,11 @@ public class DeviceDataServiceImpl extends ServiceImpl<DeviceDataMapper, DeviceD
                 customTable.setCreateTableFiledName(deviceName);
                 customTable.setFieldType("varchar(100)");
             }
+            customTable.setChoose(true);
             customTables.add(customTable);
         }
-        return customTables;
+        createTableAndTabbleName.setTableName(tableName);
+        createTableAndTabbleName.setCustomTables(customTables);
+        return createTableAndTabbleName;
     }
 }

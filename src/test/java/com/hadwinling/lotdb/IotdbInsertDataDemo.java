@@ -45,7 +45,7 @@ public class IotdbInsertDataDemo {
 
     private static SessionPool session;
 
-    private static final String ROOT_TEST_DEVICE = "root.test.device.thing";
+    private static final String ROOT_TEST_DEVICE = "root.haha";
 
     public static SessionPool getSession(){
         if (session == null) {
@@ -70,14 +70,15 @@ public class IotdbInsertDataDemo {
             String tableName = ROOT_TEST_DEVICE;
             int num = 10;
             List<String> keys = new ArrayList<>();
-            for (int i = 0; i < num; i++) {
-                keys.add(i + "");
-            }
+            keys.add("tem");
+//            for (int i = 0; i < num; i++) {
+//                keys.add(i + "");
+//            }
             Random random = new Random();
             List<String> values = new ArrayList<>();
-            for (int j = 0; j < num; j++) {
+//            for (int j = 0; j < num; j++) {
                 values.add(String.valueOf(random.nextDouble()));
-            }
+//            }
             System.out.println(values);
             long start = System.currentTimeMillis();
             for (int i = 0; i < 100; i++) {
