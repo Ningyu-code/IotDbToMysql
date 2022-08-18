@@ -61,7 +61,7 @@ public class DeviceDataServiceImpl extends ServiceImpl<DeviceDataMapper, DeviceD
             String value=dataIterator.getString(deviceName);
             String device = dataIterator.getString("Device");
             data.put("time",time);
-            data.put(deviceName,value);
+            data.put("value",value);
             data.put("device",device);
             result.add(data);
         }
@@ -88,7 +88,7 @@ public class DeviceDataServiceImpl extends ServiceImpl<DeviceDataMapper, DeviceD
                 customTable.setCreateTableFiledName("time");
                 customTable.setFieldType("varchar(100)");
             }else if (columnName.equals("Device")){
-                customTable.setCreateTableFiledName("timeseries");
+                customTable.setCreateTableFiledName("device");
                 customTable.setFieldType("varchar(100)");
             }else if (columnName.equals(deviceName)){
                 customTable.setCreateTableFiledName(deviceName);

@@ -33,5 +33,7 @@
 
 ![image-20220810172453154](https://raw.githubusercontent.com/Ningyu-code/IotDbToMysql/main/readme-pic/image-20220810172453154.png)
 
-只需要在yml文件中修改IP地址即可连接不同主机IOTDB数据库。
+只需要在yml文件中新增数据库信息，通过新建配置类，配置类利用@Value()标签选定新增数据库信息
+
+即可连接不同主机IOTDB数据库。
 

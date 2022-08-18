@@ -2,6 +2,7 @@ package com.hadwinling.lotdb.controller;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.hadwinling.lotdb.entity.CreateTableAndTabbleName;
 import com.hadwinling.lotdb.entity.CustomTable;
 import com.hadwinling.lotdb.entity.DeviceData;
@@ -42,12 +43,13 @@ public class LotdbController {
     public List<JSONObject> IotDbToMysql() throws IoTDBConnectionException, StatementExecutionException {
         List<JSONObject> deviceData = deviceDataService.IotDbToJsonResult("tem", "root.haha","align by device");
         //根据查到的IOTDB数据定制生成Mysql数据表信息
-        CreateTableAndTabbleName customTable = deviceDataService.getCustomTable("tem", "root.haha","align by device");
-        //生成表操作
-        iCreateTableService.createCustomTable(customTable);
-        //向生成表格插入数据
-        iCreateTableService.insertData(customTable.getTableName(),deviceData);
-
+        if(CollectionUtils.isNotEmpty(deviceData)){
+            CreateTableAndTabbleName customTable = deviceDataService.getCustomTable("tem", "root.haha", "align by device");
+            //生成表操作
+            iCreateTableService.createCustomTable(customTable);
+            //向生成表格插入数据
+            iCreateTableService.insertData(customTable.getTableName(), deviceData);
+        }
         return deviceData;
         }
 
@@ -55,13 +57,15 @@ public class LotdbController {
     @ResponseBody
     public List<JSONObject> IotDbToMysql(@RequestBody JSONObject jsonObject) throws IoTDBConnectionException, StatementExecutionException {
         List<JSONObject> deviceData = deviceDataService.IotDbToJsonResult( jsonObject.getString("deviceName"), jsonObject.getString("devicePath"),jsonObject.getString("whereClause"));
-        //根据查到的IOTDB数据定制生成Mysql数据表信息
-        CreateTableAndTabbleName customTable = deviceDataService.getCustomTable( jsonObject.getString("deviceName"), jsonObject.getString("devicePath"),jsonObject.getString("whereClause"));
-        //生成表操作
-        iCreateTableService.createCustomTable(customTable);
-        //向生成表格插入数据
-        iCreateTableService.insertData(customTable.getTableName(),deviceData);
-
+        if(CollectionUtils.isNotEmpty(deviceData)) {
+            //根据查到的IOTDB数据定制生成Mysql数据表信息
+            CreateTableAndTabbleName customTable = deviceDataService.getCustomTable(jsonObject.getString("deviceName"), jsonObject.getString("devicePath"), jsonObject.getString("whereClause"));
+            //生成表操作
+            iCreateTableService.createCustomTable(customTable);
+            //向生成表格插入数据
+            iCreateTableService.insertData(customTable.getTableName(), deviceData);
+            return deviceData;
+        }
         return deviceData;
     }
 
